@@ -78,6 +78,32 @@ static void KVOTest(){
     PrintDescription(@"after", p);
 }
 
+static void isaTest(){
+    Student *p = [[Student alloc] init];
+    
+    //方法1： 类调用 class
+    Class cCls = [Student class];
+    //方法2： 对象调用class 获取的是pCls的isa
+    Class pCls = [p class];
+    //方法3:  和方法2一样 获取的是pCls的isa
+    Class p2 = object_getClass(p);
+    
+    printf("\n1 %s", class_getName(cCls));
+    printf("\n2 %s", class_getName(pCls));
+    printf("\n3 %s\n", class_getName(p2));
+}
+
+
+static void weakTest(){
+    Student *p = [[Student alloc] init];
+    p.name = @"xx";
+    PrintDescription(@"after", p);
+    Person *newP = nil;
+//    newP = p;
+    id __weak weak_p = p;
+    p=nil;
+}
+
 int main(int argc, const char * argv[]) {
     // 整个程序都包含在一个@autoreleasepool中
     @autoreleasepool {
@@ -93,33 +119,20 @@ int main(int argc, const char * argv[]) {
         //        printf("sx: %d\n", sx);
         //        show_bytes(&x, sizeof(unsigned));
         //        show_bytes(&sx, sizeof(short));
-        Student *p = [[Student alloc] init];
+//        id p = [[Student alloc] init];
+       
 //        p.name = @"fan";
 //        p.age = 22;
 //        NSLog(@"%d, %@",p.age, p.name);
 //        [p fly];
         
 //        NSLog(@"Student address = %p",pcls);
-        KVOTest();
 //        const char * className = object_getClassName(p);
 //        Class metaClass = objc_getMetaClass(className);
 //        NSLog(@"className is %s,MetaClass is %s",className, class_getName(metaClass));
-        Person *newP = nil;
-        [p addObserver:p forKeyPath: @"name" options: 0 context:NULL];
-        id __weak weak_p = p;
-        p.name = @"xx";
-        PrintDescription(@"after", p);
-        newP = p;
-        //方法1： 类调用 class
-        Class cCls = [Student class];
-        //方法2： 对象调用class 获取的是pCls的isa
-        Class pCls = [p class];
-        //方法3:  和方法2一样 获取的是pCls的isa
-        Class p2 = object_getClass(p);
-
-        printf("\n1 %s", class_getName(cCls));
-        printf("\n2 %s", class_getName(pCls));
-        printf("\n3 %s\n", class_getName(p2));
+        
+        weakTest();
+       
     }
     return 0;
 }

@@ -33,6 +33,7 @@
 
 /* Begin PBXBuildFile section */
 		35EEEB332430552300C85B59 /* Student.m in Sources */ = {isa = PBXBuildFile; fileRef = 35EEEB312430552200C85B59 /* Student.m */; };
+		35EEEB36243A1AC000C85B59 /* Person+Person_category.m in Sources */ = {isa = PBXBuildFile; fileRef = 35EEEB35243A1AC000C85B59 /* Person+Person_category.m */; };
 		393CEAC00DC69E3E000B69DE /* objc-references.mm in Sources */ = {isa = PBXBuildFile; fileRef = 393CEABF0DC69E3E000B69DE /* objc-references.mm */; };
 		393CEAC60DC69E67000B69DE /* objc-references.h in Headers */ = {isa = PBXBuildFile; fileRef = 393CEAC50DC69E67000B69DE /* objc-references.h */; };
 		39ABD72312F0B61800D1054C /* objc-weak.h in Headers */ = {isa = PBXBuildFile; fileRef = 39ABD71F12F0B61800D1054C /* objc-weak.h */; };
@@ -163,6 +164,8 @@
 /* Begin PBXFileReference section */
 		35EEEB312430552200C85B59 /* Student.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Student.m; sourceTree = "<group>"; };
 		35EEEB322430552200C85B59 /* Student.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Student.h; sourceTree = "<group>"; };
+		35EEEB34243A1AC000C85B59 /* Person+Person_category.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Person+Person_category.h"; sourceTree = "<group>"; };
+		35EEEB35243A1AC000C85B59 /* Person+Person_category.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "Person+Person_category.m"; sourceTree = "<group>"; };
 		393CEABF0DC69E3E000B69DE /* objc-references.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "objc-references.mm"; path = "runtime/objc-references.mm"; sourceTree = "<group>"; };
 		393CEAC50DC69E67000B69DE /* objc-references.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-references.h"; path = "runtime/objc-references.h"; sourceTree = "<group>"; };
 		39ABD71F12F0B61800D1054C /* objc-weak.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-weak.h"; path = "runtime/objc-weak.h"; sourceTree = "<group>"; };
@@ -467,6 +470,8 @@
 				F0B786DB224389470098C355 /* Person.m */,
 				35EEEB322430552200C85B59 /* Student.h */,
 				35EEEB312430552200C85B59 /* Student.m */,
+				35EEEB34243A1AC000C85B59 /* Person+Person_category.h */,
+				35EEEB35243A1AC000C85B59 /* Person+Person_category.m */,
 				F0FA6F712244959D00E71054 /* Person+Fly.h */,
 				F0FA6F722244959D00E71054 /* Person+Fly.m */,
 			);
@@ -753,6 +758,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F0B786DC224389470098C355 /* Person.m in Sources */,
+				35EEEB36243A1AC000C85B59 /* Person+Person_category.m in Sources */,
 				F00FD3A3223B905F00A2CB68 /* main.m in Sources */,
 				F0FA6F732244959D00E71054 /* Person+Fly.m in Sources */,
 				35EEEB332430552300C85B59 /* Student.m in Sources */,

@@ -219,7 +219,7 @@ objc_object::initIsa(Class cls, bool nonpointer, bool hasCxxDtor)
         assert(!DisableNonpointerIsa);
         assert(!cls->instancesRequireRawIsa());
 
-        // 初始化一个心得isa_t结构体
+        // 初始化一个心的isa_t结构体
         isa_t newisa(0);
 
 #if SUPPORT_INDEXED_ISA
@@ -420,7 +420,7 @@ objc_object::clearDeallocating()
         // Slow path for non-pointer isa with weak refs and/or side table data.
         clearDeallocating_slow();
     }
-
+    //确保对象不在weak_table中
     assert(!sidetable_present());
 }
 

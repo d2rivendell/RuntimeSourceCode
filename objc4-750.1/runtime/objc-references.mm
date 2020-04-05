@@ -308,7 +308,7 @@ void _object_set_associative_reference(id object, void *key, id value, uintptr_t
             // break any existing association.
             // AssociationsHashMap::iterator 类型的迭代器
             AssociationsHashMap::iterator i = associations.find(disguised_object);
-            if (i != associations.end()) {
+            if (i != associations.end()) {//并非第一次设置关联对象
                 // secondary table exists
                 // 获取到ObjectAssociationMap(key是外部传来的key，value是关联对象类ObjcAssociation)
                 ObjectAssociationMap *refs = i->second;
@@ -332,7 +332,7 @@ void _object_set_associative_reference(id object, void *key, id value, uintptr_t
                 associations[disguised_object] = refs;
                 // 赋值
                 (*refs)[key] = ObjcAssociation(policy, new_value);
-                // 设置该对象的有关联对象，调用的是setHasAssociatedObjects()方法
+                // 设置isa.has_assoc = true;
                 object->setHasAssociatedObjects();
             }
         } else {

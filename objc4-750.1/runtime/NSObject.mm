@@ -238,7 +238,7 @@ objc_retain_autorelease(id obj)
     return objc_autorelease(objc_retain(obj));
 }
 
-
+//location：左边的指针 ob：右边的对象
 void
 objc_storeStrong(id *location, id obj)
 {
@@ -280,7 +280,7 @@ storeWeak(id *location, objc_object *newObj)
     // Order by lock address to prevent lock ordering problems. 
     // Retry if the old value changes underneath us.
  retry:
-    if (haveOld) {
+    if (haveOld) {//当原来的弱指针有指向其他类
         oldObj = *location;
         oldTable = &SideTables()[oldObj];
     } else {
@@ -323,7 +323,7 @@ storeWeak(id *location, objc_object *newObj)
     }
 
     // Clean up old value, if any.
-    if (haveOld) {
+    if (haveOld) {//把该weak指针从其他weak_entry_t中移除
         weak_unregister_no_lock(&oldTable->weak_table, oldObj, location);
     }
 

@@ -356,7 +356,7 @@ weak_unregister_no_lock(weak_table_t *weak_table, id referent_id,
     if (!referent) return;
 
     if ((entry = weak_entry_for_referent(weak_table, referent))) {
-        remove_referrer(entry, referrer);
+        remove_referrer(entry, referrer);//移除weak指针
         bool empty = true;
         if (entry->out_of_line()  &&  entry->num_refs != 0) {
             empty = false;
@@ -370,7 +370,7 @@ weak_unregister_no_lock(weak_table_t *weak_table, id referent_id,
             }
         }
 
-        if (empty) {
+        if (empty) {//如果referrer数组为空了，就可以把weak_entry_t从weak_table_t的数组中移除
             weak_entry_remove(weak_table, entry);
         }
     }
@@ -431,7 +431,7 @@ weak_register_no_lock(weak_table_t *weak_table, id referent_id,
     } 
     else {
         weak_entry_t new_entry(referent, referrer);
-        weak_grow_maybe(weak_table);
+        weak_grow_maybe(weak_table);//如果满足条件给weak_table扩容
         weak_entry_insert(weak_table, &new_entry);
     }
 

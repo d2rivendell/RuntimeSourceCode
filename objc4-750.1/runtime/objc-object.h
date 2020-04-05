@@ -508,6 +508,8 @@ objc_object::rootRetain(bool tryRetain, bool handleOverflow)
             return nil;
         }
         uintptr_t carry;
+        //引用计数+1； extra_rc = newisa.bits + RC_ONE， w为什么加RC_ONE 不是叫1呢？
+        //extra_rc是在newisa.bits的第56位之后，RC_ONE= 1ULL<<56，注意是位数相加和数字相加是有区别的
         newisa.bits = addc(newisa.bits, RC_ONE, 0, &carry);  // extra_rc++
 
         if (slowpath(carry)) {
@@ -595,7 +597,7 @@ objc_object::rootRelease(bool performDealloc, bool handleUnderflow)
         // don't check newisa.fast_rr; we already called any RR overrides
         uintptr_t carry;
         newisa.bits = subc(newisa.bits, RC_ONE, 0, &carry);  // extra_rc--
-        if (slowpath(carry)) {
+        if (slowpath(carry)) {//计数器为0了 跳到释放代码部分-underflow
             // don't ClearExclusive()
             goto underflow;
         }
@@ -611,7 +613,7 @@ objc_object::rootRelease(bool performDealloc, bool handleUnderflow)
     // abandon newisa to undo the decrement
     newisa = oldisa;
 
-    if (slowpath(newisa.has_sidetable_rc)) {
+    if (slowpath(newisa.has_sidetable_rc)) {//是否有指针计数放在side tabel
         if (!handleUnderflow) {
             ClearExclusive(&isa.bits);
             return rootRelease_underflow(performDealloc);
@@ -634,7 +636,7 @@ objc_object::rootRelease(bool performDealloc, bool handleUnderflow)
         // To avoid races, has_sidetable_rc must remain set 
         // even if the side table count is now zero.
 
-        if (borrowed > 0) {
+        if (borrowed > 0) {//
             // Side table retain count decreased.
             // Try to add them to the inline count.
             newisa.extra_rc = borrowed - 1;  // redo the original decrement too
@@ -679,7 +681,7 @@ objc_object::rootRelease(bool performDealloc, bool handleUnderflow)
 
     // Really deallocate.
 
-    if (slowpath(newisa.deallocating)) {
+    if (slowpath(newisa.deallocating)) {//判断是否重复deallocating
         ClearExclusive(&isa.bits);
         if (sideTableLocked) sidetable_unlock();
         return overrelease_error();
@@ -692,6 +694,7 @@ objc_object::rootRelease(bool performDealloc, bool handleUnderflow)
 
     __sync_synchronize();
     if (performDealloc) {
+        //开始释放对象内存
         ((void(*)(objc_object *, SEL))objc_msgSend)(this, SEL_dealloc);
     }
     return true;

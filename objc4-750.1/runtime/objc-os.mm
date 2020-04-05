@@ -449,6 +449,7 @@ map_images_nolock(unsigned mhCount, const char * const mhPaths[],
     // This function is called before ordinary library initializers. 
     // fixme defer initialization until an objc-using image is found?
     if (firstTime) {
+        //初始化dyld预优化共享缓存，比如系统动态库会放在共享缓存中，iOS无法禁用共享缓存
         preopt_init();
     }
 
@@ -467,7 +468,7 @@ map_images_nolock(unsigned mhCount, const char * const mhPaths[],
         uint32_t i = mhCount;
         while (i--) {
             const headerType *mhdr = (const headerType *)mhdrs[i];
-
+            //在 dyld 共享缓存的hinfo中能找到对应的mhdr的话就是预优化过的，否则就算在unoptimizedTotalClasses中
             auto hi = addHeader(mhdr, mhPaths[i], totalClasses, unoptimizedTotalClasses);
             if (!hi) {
                 // no objc data in this entry

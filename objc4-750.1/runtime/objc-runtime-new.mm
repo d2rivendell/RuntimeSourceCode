@@ -2009,7 +2009,7 @@ missingWeakSuperclass(Class cls)
 {
     assert(!cls->isRealized());
 
-    if (!cls->superclass) {
+    if (!cls->superclass) {//没有父类
         // superclass nil. This is normal for root classes only.
         return (!(cls->data()->flags & RO_ROOT));
     } else {
@@ -2296,8 +2296,13 @@ bool mustReadClasses(header_info *hi)
 Class readClass(Class cls, bool headerIsBundle, bool headerIsPreoptimized)
 {
     const char *mangledName = cls->mangledName();
+    printf("=== %s \n", mangledName);
+    if ( strcmp(mangledName, "Person") == 0||
+        strcmp(mangledName, "Person") == 0){
+            printf("yes");
+    }
     
-    if (missingWeakSuperclass(cls)) {
+    if (missingWeakSuperclass(cls)) {//　父类是weak-linked 并且是missing.
         // No superclass (probably weak-linked). 
         // Disavow any knowledge of this subclass.
         if (PrintConnecting) {
@@ -2331,13 +2336,14 @@ Class readClass(Class cls, bool headerIsBundle, bool headerIsPreoptimized)
         // This name was previously allocated as a future class.
         // Copy objc_class to future class's struct.
         // Preserve future's rw data block.
+        //future class的名字和当前的一样， 拷贝当前的class覆盖掉future class,
         
         if (newCls->isAnySwift()) {
             _objc_fatal("Can't complete future class request for '%s' "
                         "because the real class is too big.", 
                         cls->nameForLogging());
         }
-        
+        //但是留下future class 的class_rw_t ，ro指向当前
         class_rw_t *rw = newCls->data();
         const class_ro_t *old_ro = rw->ro;
         memcpy(newCls, cls, sizeof(objc_class));
@@ -2582,7 +2588,7 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
         for (i = 0; i < count; i++) {
             Class cls = (Class)classlist[i];
             Class newCls = readClass(cls, headerIsBundle, headerIsPreoptimized);
-
+             //cls 替换了future class
             if (newCls != cls  &&  newCls) {
                 // Class was moved but not deleted. Currently this occurs 
                 // only when the new class resolved a future class.
@@ -2685,6 +2691,7 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
     ts.log("IMAGE TIMES: fix up @protocol references");
 
     // Realize non-lazy classes (for +load methods and static instances)
+    //实现了load方法以及静态单例的类就是non-lazy classes,对该类进行realizeClass
     for (EACH_HEADER) {
         classref_t *classlist = 
             _getObjc2NonlazyClassList(hi, &count);

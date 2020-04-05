@@ -243,7 +243,7 @@ void
 objc_storeStrong(id *location, id obj)
 {
     id prev = *location;
-    if (obj == prev) {
+    if (obj == prev) {//自己指向自己不做处理
         return;
     }
     objc_retain(obj);
@@ -1401,6 +1401,7 @@ objc_object::sidetable_moveExtraRC_nolock(size_t extra_rc,
 
 // Move some retain counts to the side table from the isa field.
 // Returns true if the object is now pinned.
+//每次调用这个发方法，会把isa中的引用计数器的一半放到sidetable中
 bool 
 objc_object::sidetable_addExtraRC_nolock(size_t delta_rc)
 {
@@ -1412,10 +1413,12 @@ objc_object::sidetable_addExtraRC_nolock(size_t delta_rc)
     // isa-side bits should not be set here
     assert((oldRefcnt & SIDE_TABLE_DEALLOCATING) == 0);
     assert((oldRefcnt & SIDE_TABLE_WEAKLY_REFERENCED) == 0);
-
+   //判断计数器有没有溢出，溢出时会被置为第64位为1，即状态为SIDE_TABLE_RC_PINNED
     if (oldRefcnt & SIDE_TABLE_RC_PINNED) return true;
 
     uintptr_t carry;
+    //SideTable的计数器是从第三位开始计数的，第一位记录SIDE_TABLE_DEALLOCATING，第二位记录SIDE_TABLE_WEAKLY_REFERENCED
+    //把引用计数器的的数量delta_rc先往左移动两位再累加进去
     size_t newRefcnt = 
         addc(oldRefcnt, delta_rc << SIDE_TABLE_RC_SHIFT, 0, &carry);
     if (carry) {

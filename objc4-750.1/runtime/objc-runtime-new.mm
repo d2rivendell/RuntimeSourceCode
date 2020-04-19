@@ -784,7 +784,7 @@ attachCategories(Class cls, category_list *cats, bool flush_caches)
     int protocount = 0;
     int i = cats->count;
     bool fromBundle = NO;
-    while (i--) {
+    while (i--) {// 从后往前依次遍历
         auto& entry = cats->list[i];
 
         method_list_t *mlist = entry.cat->methodsForMeta(isMeta);
@@ -2336,7 +2336,8 @@ Class readClass(Class cls, bool headerIsBundle, bool headerIsPreoptimized)
         // This name was previously allocated as a future class.
         // Copy objc_class to future class's struct.
         // Preserve future's rw data block.
-        //future class的名字和当前的一样， 拷贝当前的class覆盖掉future class,
+        //future class的名字和当前的一样， 拷贝当前的class 数据到future class中
+        //并保留future class 的rw到ro中
         
         if (newCls->isAnySwift()) {
             _objc_fatal("Can't complete future class request for '%s' "
@@ -2696,6 +2697,7 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
         classref_t *classlist = 
             _getObjc2NonlazyClassList(hi, &count);
         for (i = 0; i < count; i++) {
+            //查找remapped_class_map表中是否有有类被重新引用到其他地址，有返回新的，没有返回当前类对象
             Class cls = remapClass(classlist[i]);
             if (!cls) continue;
 
@@ -2763,6 +2765,7 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
             if (cat->instanceMethods ||  cat->protocols  
                 ||  cat->instanceProperties) 
             {
+                //实例方法加到cls中
                 addUnattachedCategoryForClass(cat, cls, hi);
                 if (cls->isRealized()) {
                     remethodizeClass(cls);
@@ -2778,6 +2781,7 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
             if (cat->classMethods  ||  cat->protocols  
                 ||  (hasClassProperties && cat->_classProperties)) 
             {
+                 //类方法加到元类中
                 addUnattachedCategoryForClass(cat, cls->ISA(), hi);
                 if (cls->ISA()->isRealized()) {
                     remethodizeClass(cls->ISA());
@@ -4988,7 +4992,7 @@ IMP lookUpImpOrForward(Class cls, SEL sel, id inst,
     }
 
     // No implementation found. Try method resolver once.
-
+    //缓存和父类中都没有 还有一次机会进行拯救
     if (resolver  &&  !triedResolver) {
         runtimeLock.unlock();
         _class_resolveMethod(cls, sel, inst);
@@ -5001,7 +5005,8 @@ IMP lookUpImpOrForward(Class cls, SEL sel, id inst,
 
     // No implementation found, and method resolver didn't help. 
     // Use forwarding.
-
+    //类最终还是没在resolveInstanceMethod或resolveClassMethod方法中生成这个sel的实现
+    //最后将这个可怜的sel映射到_objc_msgForward_impcache
     imp = (IMP)_objc_msgForward_impcache;
     cache_fill(cls, sel, imp, inst);
 
@@ -5407,7 +5412,7 @@ void objc_class::setInstancesRequireRawIsa(bool inherited)
 **********************************************************************/
 void objc_class::chooseClassArrayIndex()
 {
-#if SUPPORT_INDEXED_ISA
+#if SUPPORT_INDEXED_ISA //iOS 设备上 SUPPORT_INDEXED_ISA 是 0。
     Class cls = (Class)this;
     runtimeLock.assertLocked();
 

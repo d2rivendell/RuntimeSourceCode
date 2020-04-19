@@ -14,6 +14,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property(copy, nonatomic) NSString *name;
 
 @property(copy, nonatomic) NSString *gener;
+
+@property(strong, nonatomic) Person *girlFriend;
+
+@property(assign, nonatomic) int style;
 @end
 
 NS_ASSUME_NONNULL_END

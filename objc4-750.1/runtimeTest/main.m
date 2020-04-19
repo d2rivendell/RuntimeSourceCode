@@ -5,13 +5,13 @@
 //
 
 #import <Foundation/Foundation.h>
-//#import "objc-runtime.h"
+//#import "objc-runtime-new.h"
 #include <objc/runtime.h>
 #include <objc/message.h>
 #import "Person.h"
 #import "Student.h"
 #import "Person+Fly.h"
-
+#import "Test.h"
 // 把一个十进制的数转为二进制
 NSString * binaryWithInteger(NSUInteger decInt){
     NSString *string = @"";
@@ -104,6 +104,129 @@ static void weakTest(){
     p=nil;
 }
 
+static void read_attr(){
+    unsigned int count;
+    
+    //ivar 只存储了属性的名字和类型
+    Ivar *ivarList =  class_copyIvarList([Student class], &count);
+    NSLog(@"=======ivar========");
+    for (int i = 0; i < count; i++) {
+        Ivar ivar = ivarList[i];
+        char *name = ivar_getName(ivar);
+        char *encode = ivar_getTypeEncoding(ivar);
+        NSLog(@"name: %s, encode: %s", name, encode);
+    }
+    
+    //objc_property_t 存储了属性的名字、类型
+    objc_property_t *pList =  class_copyPropertyList([Student class], &count);
+    NSLog(@"=======ivar========");
+    for (int i = 0; i < count; i++) {
+        objc_property_t p = pList[i];
+        char *name = property_getName(p);
+        char *att = property_getAttributes(p);
+        NSLog(@"name: %s, att: %s", name, att);
+    }
+    
+    free(ivarList);
+    free(pList);
+}
+
+static void msg_send(){
+    Student *p = [[Student alloc] init];
+    SEL sel = @selector(shabi);
+//    BOOL (*msg)(Class, SEL, SEL) = (typeof(msg))objc_msgSend;
+    NSString* (*aTestFunc)(id, SEL, NSString*) = (NSString* (*)(id, SEL, NSString*)) objc_msgSend;
+    aTestFunc(p, sel, @"sb");
+//    [p performSelector:sel withObject:nil];
+}
+
+
+void test(id self, SEL _cmd, NSString *name, NSNumber *age){
+    NSLog(@"name: %@, age: %@", name, age);
+}
+
+void test2(id self, SEL _cmd, NSString *name, NSNumber *age, NSNumber * money){
+    NSLog(@"name: %@, age: %@, money: %@", name, age, money);
+}
+
+static void dynamicAdd(){
+
+    //创建新类，会同时创建类对象和元类对象。 --创建MyClass类，它继承自NSObject
+    Class MyClass = objc_allocateClassPair([NSObject class], "MyClass", 0);
+    
+    //添加到gdb_objc_realized_classes表中
+    objc_registerClassPair(MyClass);
+    
+    //类型表格https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
+    //给MyClass类对象添加属性
+    char *str = @encode(NSNumber*);
+    char *str2 = @encode(int);
+    char *str3 = @encode(double);
+    NSLog(@"%s, %s, %s", str, str2, str3);//@, i, @
+    
+    //Ivar只是添加变量 Property添加变量又会生成setter、getter方法
+    class_addIvar(MyClass, "money", sizeof(NSString *), log2(sizeof(NSString*)), "d");//添加double类型变量
+    
+    /*
+     属性类型  name值：T  value：变化
+     编码类型  name值：C(copy) &(strong) W(weak) 空(assign) 等 value：无
+     非/原子性 name值：空(atomic) N(Nonatomic)  value：无
+     变量名称  name值：V  value：变化
+     */
+    objc_property_attribute_t type = { "T", "@\"NSNumber\"" };//设置属性类型
+    objc_property_attribute_t policy  = { "&", nil };//
+    objc_property_attribute_t backingivar  = { "V", "_age" };//设置变量的名字
+    //顺序很重要 Type encoding must be first，Backing ivar must be last。
+    objc_property_attribute_t attrs[] = { type, policy, backingivar };
+    class_addProperty(MyClass, "age", attrs, 2);
+    
+    //第一个是返回值类型， 后面是参数类型其中"@:"是固定的，表示调用的类，sel类型
+    class_addMethod(MyClass, @selector(test), (IMP)test, "v@:@@");
+   
+    id custom =  [[MyClass alloc] init];
+    // 该方法最多能传2个参数， 如果要传多个 可使用以下方式
+    //1.字典 2.使用objc_msgSend()传递 3.使用NSInvocation
+    [custom performSelector:@selector(test) withObject: @"jack" withObject:@(22)];
+   
+    
+    SEL test2Selector = @selector(test2);
+    //传递多个参数
+    class_addMethod(MyClass, test2Selector, (IMP)test2, "v@:@@@");
+    NSMethodSignature *signature = [MyClass instanceMethodSignatureForSelector: test2Selector];
+    if (signature == nil) {
+        NSLog(@"opps!, can not find %s signature", (char *)test2Selector);
+    }else{
+        NSLog(@"传递多个参数");
+        id custom2 =  [[MyClass alloc] init];
+        //利用一个NSInvocation对象包装一次方法调用
+        NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
+        invocation.target = custom2;
+        invocation.selector = test2Selector;
+        // 设置参数
+        NSInteger paramsCount = signature.numberOfArguments - 2; // 除self、_cmd以外的参数个数
+        NSArray *objects = @[@"jack", @(21), @(20200)];
+        paramsCount = MIN(paramsCount, objects.count);
+        for (int i = 0; i < paramsCount; i++) {
+            id object = objects[i];
+            if ([object isKindOfClass:[NSNull class]]) continue;
+            //前两个参数已经固定 在第三个参数开始添加
+            [invocation setArgument:&object atIndex:i + 2];
+        }
+        // 调用方法
+        [invocation invoke];
+        // 获取返回值
+        id returnValue = nil;
+        if (signature.methodReturnLength) { // 有返回值类型，才去获得返回值
+            [invocation getReturnValue:&returnValue];
+        }
+    }
+    
+}
+
+
+
+
+
 int main(int argc, const char * argv[]) {
     // 整个程序都包含在一个@autoreleasepool中
     @autoreleasepool {
@@ -119,8 +242,10 @@ int main(int argc, const char * argv[]) {
         //        printf("sx: %d\n", sx);
         //        show_bytes(&x, sizeof(unsigned));
         //        show_bytes(&sx, sizeof(short));
-//        id p = [[Student alloc] init];
-       
+        Student *p = [[Student alloc] init];
+        [p say];
+        uint32_t s = sizeof(id);
+        printf("%d",s);
 //        p.name = @"fan";
 //        p.age = 22;
 //        NSLog(@"%d, %@",p.age, p.name);
@@ -131,7 +256,10 @@ int main(int argc, const char * argv[]) {
 //        Class metaClass = objc_getMetaClass(className);
 //        NSLog(@"className is %s,MetaClass is %s",className, class_getName(metaClass));
         
-        weakTest();
+//        weakTest();
+//        msg_send()
+//        read_attr();
+          dynamicAdd();
        
     }
     return 0;

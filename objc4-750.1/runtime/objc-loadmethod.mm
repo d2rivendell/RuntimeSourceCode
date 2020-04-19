@@ -50,8 +50,8 @@ static int loadable_classes_allocated = 0;
 
 // List of categories that need +load called (pending parent class +load)
 static struct loadable_category *loadable_categories = nil;
-static int loadable_categories_used = 0;
-static int loadable_categories_allocated = 0;
+static int loadable_categories_used = 0;//有+load分类的个数，即存储在loadable_categories的个数
+static int loadable_categories_allocated = 0;//loadable_categories的容量
 
 
 /***********************************************************************
@@ -254,6 +254,7 @@ static bool call_category_loads(void)
     }
 
     // Compact detached list (order-preserving)
+    //将cats 中category为空的结构体移除，相当于缩减数组，让里面保存有真正存储了category的结构体
     shift = 0;
     for (i = 0; i < used; i++) {
         if (cats[i].cat) {
@@ -262,10 +263,10 @@ static bool call_category_loads(void)
             shift++;
         }
     }
-    used -= shift;
+    used -= shift;//真正保存有真正存储了category的结构体的个数
 
     // Copy any new +load candidates from the new list to the detached list.
-    new_categories_added = (loadable_categories_used > 0);
+    new_categories_added = (loadable_categories_used > 0);//？？？ loadable_categories_used不是清0了吗
     for (i = 0; i < loadable_categories_used; i++) {
         if (used == allocated) {
             allocated = allocated*2 + 16;
@@ -273,7 +274,7 @@ static bool call_category_loads(void)
                 realloc(cats, allocated *
                                   sizeof(struct loadable_category));
         }
-        cats[used++] = loadable_categories[i];
+        cats[used++] = loadable_categories[i];//？？？ 不是清空了吗
     }
 
     // Destroy the new list.

@@ -806,8 +806,9 @@ attachCategories(Class cls, category_list *cats, bool flush_caches)
     }
 
     auto rw = cls->data();
-
+    //对category的方法根据SEL进行排序
     prepareMethodLists(cls, mlists, mcount, NO, fromBundle);
+    //将category的方法前置添加到方法列表中
     rw->methods.attachLists(mlists, mcount);
     free(mlists);
     if (flush_caches  &&  mcount > 0) flushCaches(cls);
@@ -4705,7 +4706,7 @@ static method_t *findMethodInSortedMethodList(SEL key, const method_list_t *list
     const method_t *probe;
     uintptr_t keyValue = (uintptr_t)key;
     uint32_t count;
-    
+    //二分查找 走到这里说明方法已经根据SEL排序。排序发生在realizeClass、和加载category阶段
     for (count = list->count; count != 0; count >>= 1) {
         probe = base + (count >> 1);
         

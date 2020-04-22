@@ -224,6 +224,7 @@ struct method_t {
     const char *types;
     MethodListIMP imp;
 
+    //根据SEL对method_list_t排序，方便调用方法的时候通过二分查找最快的方式找到方法
     struct SortBySELAddress :
         public std::binary_function<const method_t&,
                                     const method_t&, bool>

@@ -30,7 +30,12 @@ void fooMethod(id obj, SEL _cmd)
 }
 
 
-//2. 上面1没有处理的时候会再尝试调用这里
+//2.1 上面1没有处理的时候会再尝试调用这里
+- (id)forwardingTargetForSelector:(SEL)aSelector{
+    return nil;
+}
+
+//2.2 上面2.1没有处理的时候会再尝试调用这里
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector{
     NSLog(@"%s -- %@",__func__,NSStringFromSelector(aSelector));
     if (aSelector == @selector(saySomething)) {
@@ -51,6 +56,12 @@ void fooMethod(id obj, SEL _cmd)
         [anInvocation invokeWithTarget:[ForwardHanlde alloc]];
     else
         [super forwardInvocation:anInvocation];
+}
+
+
+- (void)dealloc
+{
+    NSLog(@"dealloc");
 }
 
 @end

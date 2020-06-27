@@ -4716,6 +4716,7 @@ static method_t *findMethodInSortedMethodList(SEL key, const method_list_t *list
             // `probe` is a match.
             // Rewind looking for the *first* occurrence of this value.
             // This is required for correct category overrides.
+            //虽然找到了，但是可能有category重新实现了该方法（排在内存的前面），再往前找
             while (probe > first && keyValue == (uintptr_t)probe[-1].name) {
                 probe--;
             }

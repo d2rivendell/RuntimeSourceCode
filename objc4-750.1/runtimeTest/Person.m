@@ -11,9 +11,10 @@
 + (void)load{
     NSLog(@"load");
 }
-- (void)say
+- (Person *)say
 {
     NSLog(@"hello,world!");
+    return [Person new];
 }
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {

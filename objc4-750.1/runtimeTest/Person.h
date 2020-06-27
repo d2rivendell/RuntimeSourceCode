@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(assign, nonatomic) int age;
 
-- (void)say;
+- (Person *)say;
 
 @end
 

@@ -4,6 +4,8 @@
 //
 //
 
+//Xcode 11.4 运行此demo会崩溃
+
 #import <Foundation/Foundation.h>
 //#import "objc-runtime-new.h"
 #include <objc/runtime.h>
@@ -11,7 +13,6 @@
 #import "Person.h"
 #import "Student.h"
 #import "Person+Fly.h"
-#import "Test.h"
 // 把一个十进制的数转为二进制
 NSString * binaryWithInteger(NSUInteger decInt){
     NSString *string = @"";
@@ -196,7 +197,7 @@ static void dynamicAdd(){
     if (signature == nil) {
         NSLog(@"opps!, can not find %s signature", (char *)test2Selector);
     }else{
-        NSLog(@"传递多个参数");
+        NSLog(@"NSInvocation 传递多个参数:");
         id custom2 =  [[MyClass alloc] init];
         //利用一个NSInvocation对象包装一次方法调用
         NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
@@ -220,17 +221,25 @@ static void dynamicAdd(){
             [invocation getReturnValue:&returnValue];
         }
     }
+    NSLog(@"imp 传递多个参数:");
+    id custom2_1 =  [[MyClass alloc] init];
+    SEL selector = NSSelectorFromString(@"test2");
+    IMP imp = [custom2_1 methodForSelector:selector];
+    void(*customFunc)(id,SEL,NSString *,NSNumber *,NSNumber *) = (void *)imp;
+    customFunc(custom2_1,selector,@"Lily", @(23), @(2222222));
+}
+
+void autorelease(){
+   __autoreleasing Person *jack = [[Person alloc] init];
     
 }
 
 
 
-
-
 int main(int argc, const char * argv[]) {
     // 整个程序都包含在一个@autoreleasepool中
-    @autoreleasepool {
-        
+//    @autoreleasepool {
+    
         // insert code here...
        
         //        show_bytes(&x, sizeof(int));
@@ -243,7 +252,8 @@ int main(int argc, const char * argv[]) {
         //        show_bytes(&x, sizeof(unsigned));
         //        show_bytes(&sx, sizeof(short));
         Student *p = [[Student alloc] init];
-        [p say];
+        //返回值是对象的时候编译器会做优化
+//        [p performSelector:@selector(say) withObject:nil];
         uint32_t s = sizeof(id);
         printf("%d",s);
 //        p.name = @"fan";
@@ -257,10 +267,15 @@ int main(int argc, const char * argv[]) {
 //        NSLog(@"className is %s,MetaClass is %s",className, class_getName(metaClass));
         
 //        weakTest();
-//        msg_send()
+    msg_send();
 //        read_attr();
-          dynamicAdd();
-       
-    }
+//          dynamicAdd();
+//        NSProcessInfo *info =  [NSProcessInfo processInfo];
+//        NSLog(@"processorCount: %ld", info.processorCount);
+//        NSLog(@"processName: %@", info.processName);
+//        NSLog(@"physicalMemory: %llu", info.physicalMemory);
+//        NSLog(@"arguments: %@", info.arguments);
+//         isaTest();
+//    }
     return 0;
 }

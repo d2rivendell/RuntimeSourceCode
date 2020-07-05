@@ -108,6 +108,9 @@ static void weakTest(){
 static void read_attr(){
     unsigned int count;
     
+    //类对象中存储着成员变量的信息ivar, 注意是“成员变量信息”，比如名字和编码
+    //成员变量的值还是存在实例变量中
+    
     //ivar 只存储了属性的名字和类型
     Ivar *ivarList =  class_copyIvarList([Student class], &count);
     NSLog(@"=======ivar========");
@@ -118,7 +121,7 @@ static void read_attr(){
         NSLog(@"name: %s, encode: %s", name, encode);
     }
     NSLog(@"=======ivar========");
-    //objc_property_t 存储了属性的名字、属性（）
+    //objc_property_t 存储了属性的名字、属性和Ivar一样只是信息，不是成员变量
     objc_property_t *pList =  class_copyPropertyList([Student class], &count);
     NSLog(@"=======objc_property_t========");
     for (int i = 0; i < count; i++) {
@@ -252,9 +255,6 @@ int main(int argc, const char * argv[]) {
         //        show_bytes(&x, sizeof(unsigned));
         //        show_bytes(&sx, sizeof(short));
         Student *p = [[Student alloc] init];
-    NSLog(@"%uz", class_getInstanceSize([p class]));
-    NSLog(@"%uz", malloc_size((__bridge const *void)p)));
-    NSLog(@"%uz", sizeof(p));
         //返回值是对象的时候编译器会做优化
 //        [p performSelector:@selector(say) withObject:nil];
         uint32_t s = sizeof(id);

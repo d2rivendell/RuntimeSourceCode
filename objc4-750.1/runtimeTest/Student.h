@@ -10,7 +10,10 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Student : Person
-
+{
+@public
+    int _height;
+}
 @property(copy, nonatomic) NSString *name;
 
 @property(copy, nonatomic) NSString *gener;

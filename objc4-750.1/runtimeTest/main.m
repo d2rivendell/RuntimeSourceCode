@@ -117,17 +117,17 @@ static void read_attr(){
         char *encode = ivar_getTypeEncoding(ivar);
         NSLog(@"name: %s, encode: %s", name, encode);
     }
-    
-    //objc_property_t 存储了属性的名字、类型
-    objc_property_t *pList =  class_copyPropertyList([Student class], &count);
     NSLog(@"=======ivar========");
+    //objc_property_t 存储了属性的名字、属性（）
+    objc_property_t *pList =  class_copyPropertyList([Student class], &count);
+    NSLog(@"=======objc_property_t========");
     for (int i = 0; i < count; i++) {
         objc_property_t p = pList[i];
         char *name = property_getName(p);
         char *att = property_getAttributes(p);
         NSLog(@"name: %s, att: %s", name, att);
     }
-    
+    NSLog(@"=======objc_property_t========");
     free(ivarList);
     free(pList);
 }
@@ -252,6 +252,9 @@ int main(int argc, const char * argv[]) {
         //        show_bytes(&x, sizeof(unsigned));
         //        show_bytes(&sx, sizeof(short));
         Student *p = [[Student alloc] init];
+    NSLog(@"%uz", class_getInstanceSize([p class]));
+    NSLog(@"%uz", malloc_size((__bridge const *void)p)));
+    NSLog(@"%uz", sizeof(p));
         //返回值是对象的时候编译器会做优化
 //        [p performSelector:@selector(say) withObject:nil];
         uint32_t s = sizeof(id);
@@ -267,8 +270,8 @@ int main(int argc, const char * argv[]) {
 //        NSLog(@"className is %s,MetaClass is %s",className, class_getName(metaClass));
         
 //        weakTest();
-    msg_send();
-//        read_attr();
+//        msg_send();
+        read_attr();
 //          dynamicAdd();
 //        NSProcessInfo *info =  [NSProcessInfo processInfo];
 //        NSLog(@"processorCount: %ld", info.processorCount);

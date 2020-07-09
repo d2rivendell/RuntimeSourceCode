@@ -13,6 +13,7 @@
 #import "Person.h"
 #import "Student.h"
 #import "Person+Fly.h"
+#import "Person+Person_category.h"
 // 把一个十进制的数转为二进制
 NSString * binaryWithInteger(NSUInteger decInt){
     NSString *string = @"";
@@ -157,8 +158,10 @@ static void dynamicAdd(){
 
     //创建新类，会同时创建类对象和元类对象。 --创建MyClass类，它继承自NSObject
     Class MyClass = objc_allocateClassPair([NSObject class], "MyClass", 0);
-    
+    //class_addIvar要在注册 class之前，否者添加失败，因为注册后类的布局已经确定，不能再添加Ivar
+    class_addIvar(MyClass, "money", sizeof(NSString *), log2(sizeof(NSString*)), "d");//添加double类型变量
     //添加到gdb_objc_realized_classes表中
+
     objc_registerClassPair(MyClass);
     
     //类型表格https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
@@ -166,11 +169,15 @@ static void dynamicAdd(){
     char *str = @encode(NSNumber*);
     char *str2 = @encode(int);
     char *str3 = @encode(double);
-    NSLog(@"%s, %s, %s", str, str2, str3);//@, i, @
+    char *str4 = @encode(BOOL);//BOOL类型本质是signed char
+    NSLog(@"%s, %s, %s, %s", str, str2, str3, str4);//@, i, @
     
     //Ivar只是添加变量 Property添加变量又会生成setter、getter方法
-    class_addIvar(MyClass, "money", sizeof(NSString *), log2(sizeof(NSString*)), "d");//添加double类型变量
-    
+    //对于已经存在的类，class_addIvar是不能够添加属性的
+  
+    id my  = [[MyClass alloc] init];
+    [my setValue:@"1234" forKey:@"money"];
+    NSLog(@"%@", [my valueForKey:@"money"]);
     /*
      属性类型  name值：T  value：变化
      编码类型  name值：C(copy) &(strong) W(weak) 空(assign) 等 value：无
@@ -238,10 +245,23 @@ void autorelease(){
 }
 
 
+void msgForward(){
+    Student *p = [[Student alloc] init];
+    int res = [p getAgeWith:@"vivi" andHeight:180];
+          [p foo];
+          [p test];
+          [Student bebo];
+    NSLog(@"返回： %d", res);
+}
 
+void exchange(){
+    Person *p = [[Person alloc] init];
+    [p func1];
+    [p func2];
+}
 int main(int argc, const char * argv[]) {
     // 整个程序都包含在一个@autoreleasepool中
-//    @autoreleasepool {
+    @autoreleasepool {
     
         // insert code here...
        
@@ -254,7 +274,6 @@ int main(int argc, const char * argv[]) {
         //        printf("sx: %d\n", sx);
         //        show_bytes(&x, sizeof(unsigned));
         //        show_bytes(&sx, sizeof(short));
-        Student *p = [[Student alloc] init];
         //返回值是对象的时候编译器会做优化
 //        [p performSelector:@selector(say) withObject:nil];
         uint32_t s = sizeof(id);
@@ -271,14 +290,16 @@ int main(int argc, const char * argv[]) {
         
 //        weakTest();
 //        msg_send();
-        read_attr();
-//          dynamicAdd();
+//        read_attr();
+          dynamicAdd();
 //        NSProcessInfo *info =  [NSProcessInfo processInfo];
 //        NSLog(@"processorCount: %ld", info.processorCount);
 //        NSLog(@"processName: %@", info.processName);
 //        NSLog(@"physicalMemory: %llu", info.physicalMemory);
 //        NSLog(@"arguments: %@", info.arguments);
 //         isaTest();
-//    }
+//        msgForward();
+        exchange();
+    }
     return 0;
 }

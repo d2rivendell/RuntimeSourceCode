@@ -351,7 +351,7 @@ void _object_set_associative_reference(id object, void *key, id value, uintptr_t
         }
     }
     // release the old value (outside of the lock).
-    // 释放旧的关联对象
+    // 释放旧的关联对象,  内部会判断是不是retain
     if (old_association.hasValue()) ReleaseValue()(old_association);
 }
 

@@ -527,10 +527,10 @@ bucket_t * cache_t::find(cache_key_t k, id receiver)
 
     bucket_t *b = buckets();
     mask_t m = mask();
-    mask_t begin = cache_hash(k, m);
+    mask_t begin = cache_hash(k, m);//找到哈希表数组的下标
     mask_t i = begin;
     do {
-        if (b[i].key() == 0  ||  b[i].key() == k) {
+        if (b[i].key() == 0  ||  b[i].key() == k) {//找到就返回，没找到返回下一个空的给外面s设置
             return &b[i];
         }
     } while ((i = cache_next(i, m)) != begin);
@@ -546,6 +546,7 @@ void cache_t::expand()
     cacheUpdateLock.assertLocked();
     
     uint32_t oldCapacity = capacity();
+    //扩容两倍
     uint32_t newCapacity = oldCapacity ? oldCapacity*2 : INIT_CACHE_SIZE;
 
     if ((uint32_t)(mask_t)newCapacity != newCapacity) {
@@ -584,6 +585,7 @@ static void cache_fill_nolock(Class cls, SEL sel, IMP imp, id receiver)
     }
     else {
         // Cache is too full. Expand it.
+        //清除缓存并扩容两倍, 清空缓存是mask变了，原来的定位数组下标的方式也变了
         cache->expand();
     }
 

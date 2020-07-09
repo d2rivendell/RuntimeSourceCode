@@ -21,6 +21,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property(strong, nonatomic) Person *girlFriend;
 
 @property(assign, nonatomic) int style;
+
+
+- (void)test;
+- (void)foo;
++ (void)bebo;
+- (int)getAgeWith: (NSString *)name andHeight: (int)height;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -42,8 +42,8 @@ private:
     MethodCacheIMP _imp;
     cache_key_t _key;
 #else
-    cache_key_t _key;
-    MethodCacheIMP _imp;
+    cache_key_t _key; //SEL作为key
+    MethodCacheIMP _imp;//函数内存地址
 #endif
 
 public:
@@ -57,9 +57,9 @@ public:
 
 
 struct cache_t {
-    struct bucket_t *_buckets;
-    mask_t _mask;
-    mask_t _occupied;
+    struct bucket_t *_buckets;//哈希表（散列表）
+    mask_t _mask;//哈希表的长度-1
+    mask_t _occupied;//已经缓存的数量
 
 public:
     struct bucket_t *buckets();
@@ -1133,7 +1133,7 @@ struct objc_class : objc_object {
     // Class ISA;
     // superclass占8位
     Class superclass;
-    // 缓存的是指针和vtable,目的是加速方法的调用  cache占16位
+    // 缓存方法，内部数据结构是哈希表
     cache_t cache;             // formerly cache pointer and vtable
     // class_data_bits_t 相当于是class_rw_t 指针加上rr/alloc标志
     class_data_bits_t bits;    // class_rw_t * plus custom rr/alloc flags

@@ -3105,7 +3105,8 @@ void method_exchangeImplementations(Method m1, Method m2)
     // RR/AWZ updates are slow because class is unknown
     // Cache updates are slow because class is unknown
     // fixme build list of classes whose Methods are known externally?
-
+    
+    //交换方法会清空缓存，防止缓存出错
     flushCaches(nil);
 
     updateCustomRR_AWZ(nil, m1);
@@ -4905,6 +4906,9 @@ IMP lookUpImpOrForward(Class cls, SEL sel, id inst,
     runtimeLock.assertUnlocked();
 
     // Optimistic cache lookup
+    //objc_msgSend调用lookUpImpOrForward时cache参数为false。 因为objc_msgSend里面已经查找过一次缓存，
+    //没有找到才调用lookUpImpOrForward。这里不需要查找。
+    //但是动态方法解析调用lookUpImpOrForward时cache参数为true
     if (cache) {
         imp = cache_getImp(cls, sel);
         if (imp) return imp;
@@ -4922,10 +4926,12 @@ IMP lookUpImpOrForward(Class cls, SEL sel, id inst,
     runtimeLock.lock();
     checkIsKnownClass(cls);
 
+    //不含有+load方法的对象，会在初次调用方法时会进行一次realizeClass操作
+    //主要是生成rw，并指向原有ro
     if (!cls->isRealized()) {
         realizeClass(cls);
     }
-
+     //初次使用该类。会调用一次initialize()方法
     if (initialize  &&  !cls->isInitialized()) {
         runtimeLock.unlock();
         _class_initialize (_class_getNonMetaClass(cls, inst));
@@ -4941,11 +4947,12 @@ IMP lookUpImpOrForward(Class cls, SEL sel, id inst,
     runtimeLock.assertLocked();
 
     // Try this class's cache.
-
+    //查找当前在当前类/元类对象的缓存，这里查找缓存上面不找的原因是防止动态添加方法？
     imp = cache_getImp(cls, sel);
     if (imp) goto done;
 
     // Try this class's method lists.
+    //在当前类/元类对象找
     {
         Method meth = getMethodNoSuper_nolock(cls, sel);
         if (meth) {
@@ -4956,6 +4963,7 @@ IMP lookUpImpOrForward(Class cls, SEL sel, id inst,
     }
 
     // Try superclass caches and method lists.
+    //在当前类/元类对象的父类的缓存或者方法列表里面查找
     {
         unsigned attempts = unreasonableClassCount();
         for (Class curClass = cls->superclass;
@@ -4986,6 +4994,7 @@ IMP lookUpImpOrForward(Class cls, SEL sel, id inst,
             // Superclass method list.
             Method meth = getMethodNoSuper_nolock(curClass, sel);
             if (meth) {
+                //将父类对象的方法缓存在【本类】的缓存里面！！！
                 log_and_fill_cache(cls, meth->imp, sel, inst, curClass);
                 imp = meth->imp;
                 goto done;

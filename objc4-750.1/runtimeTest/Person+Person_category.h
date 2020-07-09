@@ -12,7 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface Person (Person_category)
 
 @property (nonatomic, strong) NSString *categoryProperty;
-
+@property(nonatomic, copy) NSString *school;
 @end
 
 NS_ASSUME_NONNULL_END

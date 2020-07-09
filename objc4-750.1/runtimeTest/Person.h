@@ -14,6 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (Person *)say;
 
+
+- (void)func1;
+- (void)func2;
 @end
 
 NS_ASSUME_NONNULL_END

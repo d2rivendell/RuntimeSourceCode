@@ -807,7 +807,7 @@ class AutoreleasePoolPage
     // 这里需要注意的是，因为AutoreleasePool实际上就是由AutoreleasePoolPage组成的双向链表
     // 因此，*stop可能不是在最新的AutoreleasePoolPage中，也就是下面的hotPage，这时需要从hotPage
     // 开始，一直释放，直到stop，中间所经过的所有AutoreleasePoolPage,里面的对象都要释放
-    void releaseUntil(id *stop) 
+    void releaseUntil(id *stop) //stop就是最近的哨兵地址
     {
         // Not recursive: we don't want to blow out the stack 
         // if a thread accumulates a stupendous amount of garbage
@@ -823,7 +823,7 @@ class AutoreleasePoolPage
             // 如果page为空的话，将page指向上一个page
             // 注释写到猜测这里可以使用if，我感觉也可以使用if
             // 因为根据AutoreleasePoolPage的结构，理论上不可能存在连续两个page都为空
-            while (page->empty()) {
+            while (page->empty()) {//autoreleasePoolPage对象都释放完了，找上一个
                 page = page->parent;
                 setHotPage(page);
             }
@@ -907,14 +907,16 @@ class AutoreleasePoolPage
     static AutoreleasePoolPage *pageForPointer(uintptr_t p) 
     {
         AutoreleasePoolPage *result;
-        // 偏移量
+        // 偏移量, ios16个字节对齐； 4096用16进制表示是0x1000 --2进制是 0001 0000 0000 0000 2^12
         uintptr_t offset = p % SIZE;
-
+//   [pageAddrees..................POOL_BOUNDARYDAddres]
+//找到pageAddrees和POOL_BOUNDARYDAddres中间的offset
+//最后根据POOL_BOUNDARYDAddres和offset定位到当前AutoreleasePoolPage的指针
         assert(offset >= sizeof(AutoreleasePoolPage));
 
         result = (AutoreleasePoolPage *)(p - offset);
         result->fastcheck();
-
+        //result就是哨兵所在的AutoreleasePoolPage指针的地址
         return result;
     }
 
@@ -1137,7 +1139,7 @@ public:
             }
             return;
         }
-
+        //page 是哨兵token对应的page
         page = pageForPointer(token);
         stop = (id *)token;
         if (*stop != POOL_BOUNDARY) {

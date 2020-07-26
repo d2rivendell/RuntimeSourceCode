@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @public
     int _height;
 }
-@property(copy, nonatomic) NSString *name;
+@property(strong, nonatomic) NSString *name;
 
 @property(copy, nonatomic) NSString *gener;
 
@@ -22,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(assign, nonatomic) int style;
 
+@property(strong, nonatomic) NSArray *array;
 
 - (void)test;
 - (void)foo;

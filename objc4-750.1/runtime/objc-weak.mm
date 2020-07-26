@@ -486,8 +486,8 @@ weak_clear_no_lock(weak_table_t *weak_table, id referent_id)
     for (size_t i = 0; i < count; ++i) {
         objc_object **referrer = referrers[i];
         if (referrer) {
-            if (*referrer == referent) {
-                *referrer = nil;
+            if (*referrer == referent) {//weak指针都指向同个对象
+                *referrer = nil;//把weak指针置为nil
             }
             else if (*referrer) {
                 _objc_inform("__weak variable at %p holds %p instead of %p. "
@@ -499,7 +499,7 @@ weak_clear_no_lock(weak_table_t *weak_table, id referent_id)
             }
         }
     }
-    
+    //把weak_entry_t移出weak_table_t
     weak_entry_remove(weak_table, entry);
 }
 

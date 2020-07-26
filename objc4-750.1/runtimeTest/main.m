@@ -14,6 +14,8 @@
 #import "Student.h"
 #import "Person+Fly.h"
 #import "Person+Person_category.h"
+#import "HookPerson.h"
+#import "Person+Ext.h"
 // 把一个十进制的数转为二进制
 NSString * binaryWithInteger(NSUInteger decInt){
     NSString *string = @"";
@@ -114,7 +116,7 @@ static void read_attr(){
     
     //ivar 只存储了属性的名字和类型
     Ivar *ivarList =  class_copyIvarList([Student class], &count);
-    NSLog(@"=======ivar========");
+    NSLog(@"=======%s ivar========",class_getName([Student class]));
     for (int i = 0; i < count; i++) {
         Ivar ivar = ivarList[i];
         char *name = ivar_getName(ivar);
@@ -124,7 +126,7 @@ static void read_attr(){
     NSLog(@"=======ivar========");
     //objc_property_t 存储了属性的名字、属性和Ivar一样只是信息，不是成员变量
     objc_property_t *pList =  class_copyPropertyList([Student class], &count);
-    NSLog(@"=======objc_property_t========");
+    NSLog(@"=======%s objc_property_t========",class_getName([Student class]));
     for (int i = 0; i < count; i++) {
         objc_property_t p = pList[i];
         char *name = property_getName(p);
@@ -254,10 +256,36 @@ void msgForward(){
     NSLog(@"返回： %d", res);
 }
 
+//交换方法
 void exchange(){
     Person *p = [[Person alloc] init];
     [p func1];
     [p func2];
+}
+
+
+void rumtime_api(){
+    //把p指向新的类对象， 达到只是hook某个实例对象而不是所有类的实例
+    //的目的
+    Person *p = [[Person alloc] init];
+    object_setClass(p, [HookPerson class]);
+    [p doSomething];
+}
+
+void atomicTest(){
+    Student *stu = [[Student alloc] init];
+    for (int i = 0; i < 100000; i++) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            //array是atomic的时候不会崩， 在nonatomic的时候会崩！
+            stu.array = @[[NSString stringWithFormat:@"那卡女款释放能量释放能量可能拉风呢拉萨v出门啦v释放能量可能拉风呢拉萨v出门啦v释放能量可能拉风呢拉萨v出门啦v可能拉风呢拉萨v出门啦v%d", i]];
+        });
+    }
+    for (int i = 0; i < 100; i++) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            NSLog(@"%@",stu.array);
+        });
+    }
+    sleep(100);
 }
 int main(int argc, const char * argv[]) {
     // 整个程序都包含在一个@autoreleasepool中
@@ -291,7 +319,6 @@ int main(int argc, const char * argv[]) {
 //        weakTest();
 //        msg_send();
 //        read_attr();
-          dynamicAdd();
 //        NSProcessInfo *info =  [NSProcessInfo processInfo];
 //        NSLog(@"processorCount: %ld", info.processorCount);
 //        NSLog(@"processName: %@", info.processName);
@@ -299,7 +326,13 @@ int main(int argc, const char * argv[]) {
 //        NSLog(@"arguments: %@", info.arguments);
 //         isaTest();
 //        msgForward();
-        exchange();
+//        exchange();
+//        dynamicAdd();
+//        rumtime_api();
+//         atomicTest();
+         Student *stu = [[Student alloc] init];
+         stu.name = @"savalvjalsfasdbvamdg;amgas;g;ag,;a,,g;a,gga";
+         NSLog(@"%@", stu.name);
     }
     return 0;
 }

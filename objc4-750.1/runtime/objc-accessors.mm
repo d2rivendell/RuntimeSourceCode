@@ -45,6 +45,8 @@ StripedMap<spinlock_t> CppObjectLocks;
 
 #define MUTABLE_COPY 2
 
+//是对象， 而且只有在copy 和atomic的时候才会调用下面两个方法
+
 id objc_getProperty(id self, SEL _cmd, ptrdiff_t offset, BOOL atomic) {
     if (offset == 0) {
         return object_getClass(self);
@@ -57,10 +59,11 @@ id objc_getProperty(id self, SEL _cmd, ptrdiff_t offset, BOOL atomic) {
     // Atomic retain release world
     spinlock_t& slotlock = PropertyLocks[slot];
     slotlock.lock();
-    id value = objc_retain(*slot);
+    id value = objc_retain(*slot);//引用计数会 +1，来向调用者保证这个对象会一直存在。假如不这样做，如有另一个线程调 setter，可能会出现线程竞态，导致引用计数降到0，原来那个对象就释放掉了。
     slotlock.unlock();
     
     // for performance, we (safely) issue the autorelease OUTSIDE of the spinlock.
+    //添加到自动释放池中
     return objc_autoreleaseReturnValue(value);
 }
 

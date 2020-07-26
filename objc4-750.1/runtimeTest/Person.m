@@ -6,6 +6,7 @@
 
 #import "Person.h"
 #include <objc/runtime.h>
+#import "Person+Ext.h"
 @implementation Person
 
 + (void)load{
@@ -15,10 +16,14 @@
     //交换方法会清空缓存，防止缓存出错
     method_exchangeImplementations(mt1, mt2);
 }
-
+- (void)doSomething{
+    NSLog(@"Person doSomething");
+}
 
 - (Person *)say
 {
+  
+    
     NSLog(@"hello,world!");
     return [Person new];
 }
@@ -34,6 +39,11 @@
     
 }
 
+
+- (void)testExt{
+    self->count = 3;
+    NSLog(@"testExt - %d", self->count);
+}
 
 
 

@@ -56,4 +56,9 @@
 - (void)func2{
     NSLog(@"I am func2");
 }
+
+
+- (void)superMe{
+    printf("superMe");
+}
 @end

@@ -120,7 +120,7 @@ struct weak_table_t {
     weak_entry_t *weak_entries;
     size_t    num_entries;
     uintptr_t mask;
-    uintptr_t max_hash_displacement;
+    uintptr_t max_hash_displacement;//hash冲突的次数
 };
 
 /// Adds an (object, weak pointer) pair to the weak table.

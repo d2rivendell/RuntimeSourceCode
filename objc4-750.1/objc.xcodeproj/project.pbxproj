@@ -173,6 +173,7 @@
 		35EEEB312430552200C85B59 /* Student.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Student.m; sourceTree = "<group>"; };
 		35EEEB34243A1AC000C85B59 /* Person+Person_category.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Person+Person_category.h"; sourceTree = "<group>"; };
 		35EEEB35243A1AC000C85B59 /* Person+Person_category.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "Person+Person_category.m"; sourceTree = "<group>"; };
+		35F15947250CBCE4000E177E /* MyProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MyProtocol.h; sourceTree = "<group>"; };
 		393CEABF0DC69E3E000B69DE /* objc-references.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "objc-references.mm"; path = "runtime/objc-references.mm"; sourceTree = "<group>"; };
 		393CEAC50DC69E67000B69DE /* objc-references.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-references.h"; path = "runtime/objc-references.h"; sourceTree = "<group>"; };
 		39ABD71F12F0B61800D1054C /* objc-weak.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "objc-weak.h"; path = "runtime/objc-weak.h"; sourceTree = "<group>"; };
@@ -486,6 +487,7 @@
 				F0FA6F712244959D00E71054 /* Person+Fly.h */,
 				F0FA6F722244959D00E71054 /* Person+Fly.m */,
 				3500D2AA24C876DC008B487A /* Person+Ext.h */,
+				35F15947250CBCE4000E177E /* MyProtocol.h */,
 			);
 			path = runtimeTest;
 			sourceTree = "<group>";

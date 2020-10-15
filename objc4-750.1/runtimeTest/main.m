@@ -16,6 +16,7 @@
 #import "Person+Person_category.h"
 #import "HookPerson.h"
 #import "Person+Ext.h"
+#import <os/lock.h>
 // 把一个十进制的数转为二进制
 NSString * binaryWithInteger(NSUInteger decInt){
     NSString *string = @"";
@@ -109,7 +110,7 @@ static void weakTest(){
 }
 
 static void read_attr(){
-    unsigned int count;
+    int count;
     
     //类对象中存储着成员变量的信息ivar, 注意是“成员变量信息”，比如名字和编码
     //成员变量的值还是存在实例变量中
@@ -119,8 +120,8 @@ static void read_attr(){
     NSLog(@"=======%s ivar========",class_getName([Student class]));
     for (int i = 0; i < count; i++) {
         Ivar ivar = ivarList[i];
-        char *name = ivar_getName(ivar);
-        char *encode = ivar_getTypeEncoding(ivar);
+        char *name = (char *)ivar_getName(ivar);
+        char *encode = (char *)ivar_getTypeEncoding(ivar);
         NSLog(@"name: %s, encode: %s", name, encode);
     }
     NSLog(@"=======ivar========");
@@ -129,8 +130,8 @@ static void read_attr(){
     NSLog(@"=======%s objc_property_t========",class_getName([Student class]));
     for (int i = 0; i < count; i++) {
         objc_property_t p = pList[i];
-        char *name = property_getName(p);
-        char *att = property_getAttributes(p);
+        char *name = (char *)property_getName(p);
+        char *att = (char *)property_getAttributes(p);
         NSLog(@"name: %s, att: %s", name, att);
     }
     NSLog(@"=======objc_property_t========");
@@ -287,6 +288,33 @@ void atomicTest(){
     }
     sleep(100);
 }
+
+void blockTest(){
+    int a = 3;
+    void(^Myblock)(void) = ^{
+        NSLog(@"lolo %d", a);
+    };
+    Class cls = [Myblock class];
+    NSLog(@"%@",cls);
+    while (class_getSuperclass(cls) != [NSObject  class]) {//NSObject的最近子类就是NSBlock
+        cls = class_getSuperclass(cls);
+        NSLog(@"%@",cls);
+    }
+    //定位到NSBlock类对象
+    NSLog(@"%@",  cls);
+    unsigned int count;
+   
+    NSLog(@"=======%s method========",class_getName(cls));
+    Method *method = class_copyMethodList(cls, &count);
+    for (unsigned int i = 0; i < count; i++) {
+        Method m = method[i];
+        char *name = (char *)method_getName(m);
+        char *des =  (char *)method_getDescription(m);
+        NSLog(@"name: %s, des: %s", name, des);
+    }
+    NSLog(@"=======method========");
+    free(method);
+}
 int main(int argc, const char * argv[]) {
     // 整个程序都包含在一个@autoreleasepool中
     @autoreleasepool {
@@ -330,9 +358,20 @@ int main(int argc, const char * argv[]) {
 //        dynamicAdd();
 //        rumtime_api();
 //         atomicTest();
-         Student *stu = [[Student alloc] init];
-         stu.name = @"savalvjalsfasdbvamdg;amgas;g;ag,;a,,g;a,gga";
-         NSLog(@"%@", stu.name);
+        blockTest();
+        Person *per = [Person new];
+        per.age = 21;
+        NSLog(@"%d", [Person.new age]);
+        BOOL aB = NO;
+        BOOL aC = YES;
+        NSLog(@"%s-%s-%c-%c-%c",  @encode(signed char),  @encode(BOOL), aB, aC, 'b');
+        Ivar  ivar =   class_getInstanceVariable([per class], "_age");
+        int ii = object_getIvar(per, ivar);
+        __weak Person *weakPtr = per;
+        Person *per2 = [Person new];
+        weakPtr = per2;
+        per.level = @"ccc";
+        NSLog(@"");
     }
     return 0;
 }

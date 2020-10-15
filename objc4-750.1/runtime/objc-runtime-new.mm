@@ -2392,7 +2392,9 @@ readProtocol(protocol_t *newproto, Class protocol_class,
     // This is not enough to make protocols in unloaded bundles safe, 
     // but it does prevent crashes when looking up unrelated protocols.
     auto insertFn = headerIsBundle ? NXMapKeyCopyingInsert : NXMapInsert;
-
+    if (strcmp(newproto->demangledName(), "MyProtocol")  == 0) {
+        printf("");
+    }
     protocol_t *oldproto = (protocol_t *)getProtocol(newproto->mangledName);
 
     if (oldproto) {
@@ -2437,7 +2439,7 @@ readProtocol(protocol_t *newproto, Class protocol_class,
             }
         }
     }
-    else if (newproto->size >= sizeof(protocol_t)) {
+    else if (newproto->size >= sizeof(protocol_t)) {//一般的协议走这里
         // New protocol from an un-preoptimized image
         // with sufficient storage. Fix it up in place.
         // fixme duplicate protocols from unloadable bundle
@@ -2575,7 +2577,7 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
 
 
     // Discover classes. Fix up unresolved future classes. Mark bundle classes.
-
+    //MARK: ClassList
     for (EACH_HEADER) {
         classref_t *classlist = _getObjc2ClassList(hi, &count);
         
@@ -2609,6 +2611,7 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
     // Class list and nonlazy class list remain unremapped.
     // Class refs and super refs are remapped for message dispatching.
     
+    //MARK:ClassRefs
     if (!noClassesRemapped()) {
         for (EACH_HEADER) {
             Class *classrefs = _getObjc2ClassRefs(hi, &count);
@@ -2625,6 +2628,7 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
 
     ts.log("IMAGE TIMES: remap classes");
 
+    //MARK: SelectorRefs
     // Fix up @selector references
     static size_t UnfixedSelectors;
     {
@@ -2646,6 +2650,7 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
 
 #if SUPPORT_FIXUP
     // Fix up old objc_msgSend_fixup call sites
+    //MARK: MessageRefs
     for (EACH_HEADER) {
         message_ref_t *refs = _getObjc2MessageRefs(hi, &count);
         if (count == 0) continue;
@@ -2661,7 +2666,8 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
 
     ts.log("IMAGE TIMES: fix up objc_msgSend_fixup");
 #endif
-
+    
+    //MARK: ProtocolList
     // Discover protocols. Fix up protocol refs.
     for (EACH_HEADER) {
         extern objc_class OBJC_CLASS_$_Protocol;
@@ -2683,6 +2689,7 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
     // Fix up @protocol references
     // Preoptimized images may have the right 
     // answer already but we don't know for sure.
+    //MARK: ProtocolRefs
     for (EACH_HEADER) {
         protocol_t **protolist = _getObjc2ProtocolRefs(hi, &count);
         for (i = 0; i < count; i++) {
@@ -2691,7 +2698,8 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
     }
 
     ts.log("IMAGE TIMES: fix up @protocol references");
-
+    
+    //MARK: NonlazyClassList
     // Realize non-lazy classes (for +load methods and static instances)
     //实现了load方法以及静态单例的类就是non-lazy classes,对该类进行realizeClass
     for (EACH_HEADER) {
@@ -2736,6 +2744,7 @@ void _read_images(header_info **hList, uint32_t hCount, int totalClasses, int un
 
     ts.log("IMAGE TIMES: realize future classes");
 
+    //MARK: CategoryLis
     // Discover categories. 
     for (EACH_HEADER) {
         category_t **catlist = 

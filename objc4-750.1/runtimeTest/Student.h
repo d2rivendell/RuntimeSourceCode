@@ -11,7 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface Student : Person
 {
-@public
+//@public
     int _height;
 }
 @property(strong, nonatomic) NSString *name;
@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(assign, nonatomic) int style;
 
-@property(strong, nonatomic) NSArray *array;
+@property(strong, atomic) NSArray *array;
 
 - (void)test;
 - (void)foo;

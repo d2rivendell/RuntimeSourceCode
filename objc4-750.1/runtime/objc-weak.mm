@@ -321,6 +321,7 @@ weak_entry_for_referent(weak_table_t *weak_table, objc_object *referent)
         index = (index+1) & weak_table->mask;
         if (index == begin) bad_weak_table(weak_table->weak_entries);
         hash_displacement++;
+        //细节：如果referent在表内，是不会出现大于hash_displacement这种情况的。除非是新的值
         if (hash_displacement > weak_table->max_hash_displacement) {
             return nil;
         }

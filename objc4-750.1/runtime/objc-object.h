@@ -511,7 +511,6 @@ objc_object::rootRetain(bool tryRetain, bool handleOverflow)
         //引用计数+1； extra_rc = newisa.bits + RC_ONE， w为什么加RC_ONE 不是叫1呢？
         //extra_rc是在newisa.bits的第56位之后，RC_ONE= 1ULL<<56，注意是位数相加和数字相加是有区别的
         newisa.bits = addc(newisa.bits, RC_ONE, 0, &carry);  // extra_rc++
-
         if (slowpath(carry)) {
             // newisa.extra_rc++ overflowed
             if (!handleOverflow) {

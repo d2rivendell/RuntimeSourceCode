@@ -5,10 +5,10 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "MyProtocol.h"
 NS_ASSUME_NONNULL_BEGIN
 
-@interface Person : NSObject
+@interface Person : NSObject<MyProtocol>
 
 @property(assign, nonatomic) int age;
 @property(copy, nonatomic)void (^MyBlock)(void);
